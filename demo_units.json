@@ -1,0 +1,157 @@
+{
+ "about": "Made-up school-math tutoring dialogues for testing a step-authorship annotation interface. Every problem, step and message was written for this demo. Message text is stored as it would arrive from a chat export (a few messages carry deliberate copy-paste artifacts, listed in 'artifacts'); build_demo.py applies the display cleanup and writes both pages. 'expected' is the intended label for each unit and is not shown on the pages.",
+ "units": [
+  {
+   "unit_no": 1,
+   "audit_key_hash": "demo-a48-01",
+   "unit_key_hash": "demo-gold-01",
+   "topic": "probability / combinatorics",
+   "problem": "A club has 7 boys and 3 girls. Three members are picked at random to form a committee. Find the probability that exactly 2 of the 3 are girls.",
+   "steps": [
+    "ways to choose 2 girls = C(3,2) = 3",
+    "ways to choose 1 boy = C(7,1) = 7",
+    "number of committees = C(10,3) = 120"
+   ],
+   "final": "The correct answer is 21/120 = 7/40",
+   "messages": [
+    {"role": "Student", "chat_start": true, "text": "how do i start this one"},
+    {"role": "AI", "chat_start": false, "text": "Start with the favourable committees. There are C(3,2) = 3 ways to choose the two girls.nnHow many ways are there to choose the one boy?"},
+    {"role": "Student", "chat_start": false, "text": "7"},
+    {"role": "AI", "chat_start": false, "text": "Right. Now count all the possible committees of 3 members."},
+    {"role": "Student", "chat_start": false, "text": "C(10,3) = 120, so 3 × 7 / 120 = 21/120 = 7/40"},
+    {"role": "AI", "chat_start": false, "text": "Correct: the probability is 7/40."}
+   ],
+   "artifacts": "AI reply 1 has a lost paragraph break ('girls.nnHow'); the display rule turns it back into a blank line.",
+   "expected": {"two_question_page": {"q1": "first", "q2": "Student"}, "three_label_page": {"L1": "1", "L2": "Student", "L3": "no"}},
+   "why": "AI reply 1 states step 1 (3) before the student does. Steps 2 and 3 and the final 7/40 come from the student first; AI reply 3 only repeats 7/40."
+  },
+  {
+   "unit_no": 2,
+   "audit_key_hash": "demo-a48-02",
+   "unit_key_hash": "demo-gold-02",
+   "topic": "sets",
+   "problem": "In a class of 30 students, 18 play football, 12 play basketball and 5 play both. How many students play neither sport?",
+   "steps": [
+    "n(F ∪ B) = 18 + 12 − 5 = 25"
+   ],
+   "final": "5",
+   "messages": [
+    {"role": "Student", "chat_start": true, "text": "18 football, 12 basketball, 5 both, 30 in the class. how many play neither?"},
+    {"role": "AI", "chat_start": false, "text": "You have the givens. Use the formula n(F ∪ B) = n(F) + n(B) − n(F ∩ B) first. What do you get?"},
+    {"role": "Student", "chat_start": false, "text": "I'll try it later"},
+    {"role": "Student", "chat_start": true, "text": "back. the formula is n\ufffdn(n\ufffdn∪n\ufffdn)n = n(F) + n(B) − n(F ∩ B). what do I do with the 5 who play both?"},
+    {"role": "AI", "chat_start": false, "text": "They are counted twice, so subtract them once: n(F ∪ B) = 18 + 12 − 5 = 25. How many students are left?"},
+    {"role": "Student", "chat_start": false, "text": "tamam, şimdi 30 − 25 = 5. sonuç 5 mi?"},
+    {"role": "AI", "chat_start": false, "text": "Yes, 5 students play neither sport."}
+   ],
+   "artifacts": "The second chat starts with a pasted formula whose letters were lost in the export; it is shown as □(□∪□). The two-question page shows a 'new chat' divider before it.",
+   "expected": {"two_question_page": {"q1": "later", "q2": "Student"}, "three_label_page": {"L1": "2", "L2": "Student", "L3": "no"}},
+   "why": "AI reply 1 gives only the givens and a formula (a method). After the new-chat divider, AI reply 2 states 25 first. The student gives 5 first, as a tentative question in Turkish ('okay, now 30 − 25 = 5. Is the result 5?')."
+  },
+  {
+   "unit_no": 3,
+   "audit_key_hash": "demo-a48-03",
+   "unit_key_hash": "demo-gold-03",
+   "topic": "logic propositions",
+   "problem": "Let p be true (1) and q be false (0). Find the truth value of (p ∧ q′) ⇒ (p ∨ q).",
+   "steps": [
+    "q′ = 1",
+    "p ∧ q′ = 1 ∧ 1 = 1",
+    "p ∨ q = 1 ∨ 0 = 1"
+   ],
+   "final": "1 (true)",
+   "messages": [
+    {"role": "Student", "chat_start": true, "text": "q n′n  is 1 because q is 0"},
+    {"role": "AI", "chat_start": false, "text": "Yes. What do you get for p ∧ q′?"},
+    {"role": "Student", "chat_start": false, "text": "1 ∧ 1 = 1. and p ∨ q = 1 ∨ 0 = 1"},
+    {"role": "AI", "chat_start": false, "text": "Good. Now combine the two sides with the implication."},
+    {"role": "Student", "chat_start": false, "text": "1 ⇒ 1 = 1, so the statement is true"},
+    {"role": "AI", "chat_start": false, "text": "Correct, (p ∧ q′) ⇒ (p ∨ q) is true."}
+   ],
+   "artifacts": "The first message has a pasted prime with stray separators ('q n′n'); it is shown as q′.",
+   "expected": {"two_question_page": {"q1": "none", "q2": "Student"}, "three_label_page": {"L1": "none", "L2": "Student", "L3": "no"}},
+   "why": "The student does every step and the final. The AI only confirms, asks and gives an instruction, then repeats the final."
+  },
+  {
+   "unit_no": 4,
+   "audit_key_hash": "demo-a48-04",
+   "unit_key_hash": "demo-gold-04",
+   "topic": "functions",
+   "problem": "Let f(x) = 2x − 1 and g(x) = x² + 1. Find (f ∘ g)(3).",
+   "steps": [
+    "g(3) = 3² + 1 = 10"
+   ],
+   "final": "19",
+   "messages": [
+    {"role": "Student", "chat_start": true, "text": "solve (f∘g)(3)"},
+    {"role": "AI", "chat_start": false, "text": "First g(3) = 3u00b2 + 1 = 10. Then f(10) = 2 u00b7 10 − 1 = 19, so (f ∘ g)(3) = 19."},
+    {"role": "Student", "chat_start": false, "text": "ok 19"}
+   ],
+   "artifacts": "AI reply 1 has two Unicode escapes that lost their backslash (u00b2, u00b7); they are decoded to ² and ·.",
+   "expected": {"two_question_page": {"q1": "first", "q2": "AI"}, "three_label_page": {"L1": "1", "L2": "AI", "L3": "yes"}},
+   "why": "The only AI reply states the step (10) and the final (19) before the student. With one AI reply, the 'later reply' button is disabled and L1 offers only 1."
+  },
+  {
+   "unit_no": 5,
+   "audit_key_hash": "demo-a48-05",
+   "unit_key_hash": "demo-gold-05",
+   "topic": "inequalities",
+   "problem": "Solve the inequality x² − 5x + 6 ≤ 0.",
+   "steps": [
+    ["x² − 5x + 6 = (x − 2)(x − 3)", "the roots are x = 2 and x = 3"]
+   ],
+   "final": "2 ≤ x ≤ 3",
+   "messages": [
+    {"role": "Student", "chat_start": true, "text": "I factored it: (x − 2)(x − 3) ≤ 0. so the answer is x ≤ 2 or x ≥ 3?"},
+    {"role": "AI", "chat_start": false, "text": "Test a value first. For x = 0: \\(0^2 - 5 \\cdot 0 + 6 = 6\\), and \\(6 \\le 0\\) is false, so x = 0 is not a solution. What is the sign of $(x-2)(x-3)$ when $x$ lies between the two roots?"},
+    {"role": "Student", "chat_start": false, "text": "negative? I have to go now, I'll finish later"}
+   ],
+   "artifacts": "AI reply 1 is LaTeX-style text, shown as typed (the pages do not render LaTeX). The step has two equivalent forms: the two-question page joins them with 'or', the three-label page lists them as two steps.",
+   "expected": {"two_question_page": {"q1": "none", "q2": "Nobody"}, "three_label_page": {"L1": "none", "L2": "Neither", "L3": "no"}},
+   "why": "The student factors first; the AI only tests a value and repeats the student's factorisation. The student asserts a wrong final first (x ≤ 2 or x ≥ 3), and nobody states 2 ≤ x ≤ 3."
+  },
+  {
+   "unit_no": 6,
+   "audit_key_hash": "demo-a48-06",
+   "unit_key_hash": "demo-gold-06",
+   "topic": "functions / domain",
+   "problem": "Find the domain of f(x) = √(x − 1) + 1/(x − 4).",
+   "steps": [
+    "x − 1 ≥ 0, so x ≥ 1",
+    "x − 4 ≠ 0, so x ≠ 4"
+   ],
+   "final": "x ≥ 1 and x ≠ 4, i.e. [1, 4) ∪ (4, ∞)",
+   "messages": [
+    {"role": "Student", "chat_start": true, "text": "Find the domain of f(x) = n√n(n\ufffdn−n1n)n √(x − 1) + 1/(x − 4)"},
+    {"role": "AI", "chat_start": false, "text": "There are two conditions to check: what is inside the square root, and the denominator. Which values make the square root defined?"},
+    {"role": "Student", "chat_start": false, "text": "the square root needs x − 1 > 0, right?"},
+    {"role": "AI", "chat_start": false, "text": "Almost: zero is allowed under a square root, so x − 1 ≥ 0, which gives x ≥ 1. The denominator cannot be zero, so x ≠ 4. The domain is x ≥ 1 with x ≠ 4, that is [1, 4) ∪ (4, ∞)."},
+    {"role": "Student", "chat_start": false, "text": "oh ok, thanks"}
+   ],
+   "artifacts": "The first message pastes the problem with a per-character copy of √(x − 1) before the plain copy; the cleaner drops the per-character copy.",
+   "expected": {"two_question_page": {"q1": "later", "q2": "AI"}, "three_label_page": {"L1": "2", "L2": "AI", "L3": "yes"}},
+   "why": "The student pastes the problem (givens) and then gives a wrong condition (> instead of ≥). AI reply 1 only names the two conditions. AI reply 2 states both steps and the complete two-part final first."
+  },
+  {
+   "unit_no": 7,
+   "audit_key_hash": "demo-a48-07",
+   "unit_key_hash": "demo-gold-07",
+   "topic": "probability (complement)",
+   "problem": "A fair die is rolled twice. Find the probability of getting at least one 6.",
+   "steps": [
+    "P(no 6 in one roll) = 5/6",
+    "P(no 6 in two rolls) = (5/6)² = 25/36"
+   ],
+   "final": "11/36",
+   "messages": [
+    {"role": "Student", "chat_start": true, "text": "how do I do at least one 6?"},
+    {"role": "AI", "chat_start": false, "text": "Use the complement. One roll shows no 6 with probability 5/6, so P(at least one 6) = 1 − 5/6 = 1/6."},
+    {"role": "Student", "chat_start": false, "text": "but there are two rolls. isn't it 5/6 × 5/6 = 25/36, and then 1 − 25/36 = 11/36?"},
+    {"role": "AI", "chat_start": false, "text": "You are right, I forgot the second roll. The probability is 11/36."}
+   ],
+   "artifacts": "",
+   "expected": {"two_question_page": {"q1": "first", "q2": "Student"}, "three_label_page": {"L1": "1", "L2": "Student", "L3": "yes"}},
+   "why": "AI reply 1 states step 1 (5/6) first and asserts a wrong final (1/6), so L3 = yes. The student is first with the correct 11/36; a tentative question still counts."
+  }
+ ]
+}
