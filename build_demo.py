@@ -26,6 +26,7 @@ import re
 from pathlib import Path
 
 import display_clean as DCL
+from lang_toggle import add_lang_toggle
 
 HERE = Path(__file__).resolve().parent
 TPL = HERE / 'templates'
@@ -180,7 +181,10 @@ def finish(html: str, n: int) -> str:
     html = (html.replace('expected 48 labels', f'expected {n} labels')
                 .replace('expected exactly 48 units', f'expected exactly {n} units')
                 .replace('about 1 minutes', 'about 1 minute'))
-    return html.replace('<body>', '<body>' + BANNER, 1)
+    html = html.replace('<body>', '<body>' + BANNER, 1)
+    # Display-only language switch, the same one the real pages get.
+    html, _ = add_lang_toggle(html)
+    return html
 
 
 def write(rel, text):

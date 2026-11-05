@@ -1,0 +1,243 @@
+<!-- ui-lang-toggle v2: display-only language switch (both / Chinese / English). It changes no label, data or export. -->
+<style id="uiLangStyle">
+#uiLang{display:flex;justify-content:flex-end;align-items:center;gap:6px;margin:6px 12px;font:13px system-ui,-apple-system,"Segoe UI",sans-serif;color:#555}
+#uiLang .uiLangGroup{display:inline-flex;border:1px solid #bbb;border-radius:6px;overflow:hidden;background:#fff}
+#uiLang button{border:0;border-radius:0;margin:0;min-height:0;min-width:0;width:auto;padding:3px 10px;background:#fff;color:#333;font:inherit;cursor:pointer;box-shadow:none}
+#uiLang button+button{border-left:1px solid #bbb}
+#uiLang button[aria-pressed="true"]{background:#333;color:#fff}
+html[data-ui-lang="zh"] .bi-en,html[data-ui-lang="zh"] .bi-sep{display:none!important}
+html[data-ui-lang="en"] .bi-zh,html[data-ui-lang="en"] .bi-sep{display:none!important}
+</style>
+<script id="uiLangScript">
+(function () {
+  var CJK = /[\u3400-\u9fff\uf900-\ufaff\u3000-\u303f\uff01-\uff60]/;
+  var LAT = /[A-Za-z]/;
+  // Dialogue and problem content is never touched.
+  var DATA = '.msg,.problem,.final,.step,.steps,.line,script,style,textarea,#uiLang,[data-bi-skip]';
+  var LABEL_IN_DATA = '.final>strong,.final>b';
+  var NEUTRAL = '.q,.kbd,kbd';
+  var KEY = 'ui_lang_v1';
+  var mode = 'both';
+
+  // The " / " that separates a Chinese half from an English half, if any.
+  function split(t) {
+    var re = /\s\/\s/g, m, c = [], i, L, R;
+    while ((m = re.exec(t))) c.push([m.index, m.index + m[0].length]);
+    for (i = 0; i < c.length; i++) {
+      L = t.slice(0, c[i][0]); R = t.slice(c[i][1]);
+      if (CJK.test(L) && !CJK.test(R) && LAT.test(R)) return { a: c[i][0], b: c[i][1], first: 'zh' };
+    }
+    for (i = c.length - 1; i >= 0; i--) {
+      L = t.slice(0, c[i][0]); R = t.slice(c[i][1]);
+      if (!CJK.test(L) && LAT.test(L) && CJK.test(R)) return { a: c[i][0], b: c[i][1], first: 'en' };
+    }
+    return null;
+  }
+  function pickLine(s) {
+    if (mode === 'both') return s;
+    var p = split(s);
+    if (!p) return s;
+    return mode === p.first ? s.slice(0, p.a) : s.slice(p.b);
+  }
+  function pick(s) { return String(s).split('\n').map(pickLine).join('\n'); }
+
+  function inData(el) {
+    if (el.closest(LABEL_IN_DATA)) return false;
+    return !!el.closest(DATA);
+  }
+  function hasData(el) { return !!el.querySelector(DATA); }
+  function control(el) { return /^(INPUT|SELECT|TEXTAREA|BR|IMG|SVG)$/i.test(el.tagName) || el.matches(NEUTRAL); }
+  function langOf(n) {
+    if (n.nodeType === 1 && control(n)) return 'n';
+    var t = n.textContent;
+    if (CJK.test(t)) return 'zh';
+    if (/[A-Za-z]{2,}/.test(t)) return 'en';
+    return 'n';
+  }
+  function sig(el) { return el.textContent + '#' + el.childNodes.length; }
+  function wrap(node, c) {
+    var sp = document.createElement('span'); sp.className = c;
+    node.parentNode.insertBefore(sp, node); sp.appendChild(node);
+  }
+
+  // Split the text of a run of sibling nodes at p and mark each half.
+  function markRun(nodes, p) {
+    var other = p.first === 'zh' ? 'en' : 'zh';
+    var side = function (s, e) {
+      return e <= p.a ? 'bi-' + p.first : (s >= p.b ? 'bi-' + other : (s >= p.a && e <= p.b ? 'bi-sep' : null));
+    };
+    var texts = [], elems = [], off = 0;
+    function walk(n) {
+      if (n.nodeType === 3) { texts.push([n, off]); off += n.data.length; return; }
+      if (n.nodeType !== 1) return;
+      var s = off;
+      for (var k = n.firstChild; k; k = k.nextSibling) walk(k);
+      elems.push([n, s, off]);
+    }
+    nodes.forEach(walk);
+    elems.forEach(function (x) {
+      if (control(x[0]) || x[2] === x[1]) return;
+      var c = side(x[1], x[2]);
+      if (c && c !== 'bi-sep' && /[A-Za-z]|[\u3400-\u9fff\uf900-\ufaff\u3000-\u303f\uff01-\uff60]/.test(x[0].textContent)) x[0].classList.add(c);
+    });
+    texts.forEach(function (x) {
+      var node = x[0], s = x[1];
+      if (node.parentElement && node.parentElement.closest(NEUTRAL)) return;
+      var cuts = [p.a, p.b].filter(function (q) { return q > s && q < s + node.data.length; });
+      var pieces = [], start = s, cur = node;
+      cuts.forEach(function (q) { var rest = cur.splitText(q - start); pieces.push([cur, start]); start = q; cur = rest; });
+      pieces.push([cur, start]);
+      pieces.forEach(function (y) {
+        var c = side(y[1], y[1] + y[0].data.length);
+        if (!c || !y[0].data.length) return;
+        if (c !== 'bi-sep' && !/[A-Za-z]|[\u3400-\u9fff\uf900-\ufaff\u3000-\u303f\uff01-\uff60]/.test(y[0].data)) return;  // keep digits and symbols visible
+        wrap(y[0], c);
+      });
+    });
+  }
+
+  // Chinese nodes followed by English nodes with no " / " (e.g. a button with an English <small> line).
+  function pairRun(nodes) {
+    var seq = [], i;
+    for (i = 0; i < nodes.length; i++) {
+      var l = langOf(nodes[i]);
+      if (l === 'n') continue;
+      if (!seq.length || seq[seq.length - 1] !== l) seq.push(l);
+    }
+    if (seq.length !== 2) return false;
+    nodes.forEach(function (n) {
+      var l = langOf(n);
+      if (l === 'n') return;
+      if (n.nodeType === 3) wrap(n, 'bi-' + l); else n.classList.add('bi-' + l);
+    });
+    return true;
+  }
+  function kids(el) { return Array.prototype.slice.call(el.childNodes); }
+  var INLINE = /^(B|I|EM|STRONG|SPAN|SMALL|KBD|CODE|A|SUP|SUB|U|MARK|BR|LABEL|INPUT)$/;
+
+  function processEl(el) {
+    if (el.querySelector('[data-bi]')) {
+      // Mark the runs of plain text between already-marked children.
+      var run = [], groups = [];
+      kids(el).forEach(function (k) {
+        var marked = k.nodeType === 1 && (k.hasAttribute('data-bi') || k.querySelector('[data-bi]') || hasData(k) || k.matches(DATA));
+        var block = k.nodeType === 1 && !INLINE.test(k.tagName);
+        if (marked || block) { if (run.length) groups.push(run); run = []; } else run.push(k);
+      });
+      if (run.length) groups.push(run);
+      groups.forEach(function (g) {
+        var t = g.map(function (n) { return n.textContent; }).join('');
+        var p = split(t);
+        if (!p) return;
+        var box = document.createElement('span');
+        g[0].parentNode.insertBefore(box, g[0]);
+        g.forEach(function (n) { box.appendChild(n); });
+        markRun(kids(box), p);
+        box.setAttribute('data-bi', sig(box));
+      });
+      return;
+    }
+    var p = split(el.textContent);
+    if (p) { markRun(kids(el), p); el.setAttribute('data-bi', sig(el)); return; }
+    if (pairRun(kids(el))) el.setAttribute('data-bi', sig(el));
+  }
+
+  // A Chinese-only element directly followed by its English-only sibling (or the reverse).
+  function pairSiblings(list) {
+    list.forEach(function (el) {
+      if (el.hasAttribute('data-bi') || !el.isConnected) return;
+      var f = el.nextElementSibling;
+      if (!f || f.hasAttribute('data-bi') || f.matches(DATA) || hasData(f) || f.querySelector('[data-bi]')) return;
+      if (el.querySelector('[data-bi]') || hasData(el)) return;
+      var a = langOf(el), b = langOf(f);
+      if (a === 'n' || b === 'n' || a === b || split(el.textContent) || split(f.textContent)) return;
+      el.classList.add('bi-' + a); f.classList.add('bi-' + b);
+      el.setAttribute('data-bi', sig(el)); f.setAttribute('data-bi', sig(f));
+    });
+  }
+
+  var ATTRS = ['placeholder', 'title', 'aria-label'];
+  function scan() {
+    var all = document.body.querySelectorAll('*'), list = [], i;
+    for (i = 0; i < all.length; i++) {
+      var el = all[i];
+      if (inData(el)) continue;
+      ATTRS.forEach(function (a) {
+        var key = 'data-bi-' + a;
+        if (el.hasAttribute(a) && !el.hasAttribute(key) && split(el.getAttribute(a))) el.setAttribute(key, el.getAttribute(a));
+        if (el.hasAttribute(key)) el.setAttribute(a, pick(el.getAttribute(key)));
+      });
+      if (el.tagName === 'OPTION') {
+        if (!el.hasAttribute('data-bi-opt') && split(el.textContent)) el.setAttribute('data-bi-opt', el.textContent);
+        if (el.hasAttribute('data-bi-opt')) { var v = pick(el.getAttribute('data-bi-opt')); if (el.textContent !== v) el.textContent = v; }
+        continue;
+      }
+      if (el.parentElement && el.parentElement.closest('[data-bi]')) continue;
+      if (el.hasAttribute('data-bi')) {
+        if (el.getAttribute('data-bi') === sig(el)) continue;
+        el.removeAttribute('data-bi');
+      }
+      if (hasData(el)) { list.push(el); continue; }
+      list.push(el);
+    }
+    list.reverse();
+    list.forEach(function (el) { if (el.isConnected && !el.hasAttribute('data-bi') && !hasData(el)) processEl(el); });
+    pairSiblings(list.slice().reverse());
+    if (!document.documentElement.hasAttribute('data-bi-title')) document.documentElement.setAttribute('data-bi-title', document.title);
+    document.title = pick(document.documentElement.getAttribute('data-bi-title'));
+  }
+
+  var obs, busy = false, queued = false;
+  function run() {
+    queued = false; if (busy) return; busy = true;
+    if (obs) obs.disconnect();
+    try { scan(); } finally {
+      busy = false;
+      if (obs) obs.observe(document.body, { childList: true, subtree: true, characterData: true });
+    }
+  }
+  function later() { if (!queued) { queued = true; setTimeout(run, 0); } }
+
+  function setMode(m) {
+    mode = (m === 'zh' || m === 'en') ? m : 'both';
+    document.documentElement.setAttribute('data-ui-lang', mode);
+    try { localStorage.setItem(KEY, mode); } catch (e) {}
+    var bs = document.querySelectorAll('#uiLang button');
+    for (var i = 0; i < bs.length; i++) bs[i].setAttribute('aria-pressed', bs[i].getAttribute('data-lang') === mode ? 'true' : 'false');
+    run();
+  }
+
+  var bar = document.createElement('div');
+  bar.id = 'uiLang';
+  bar.innerHTML = '<span>界面语言 Language</span><span class="uiLangGroup">' +
+    '<button type="button" data-lang="both">中英</button><button type="button" data-lang="zh">中文</button>' +
+    '<button type="button" data-lang="en">English</button></span>';
+  bar.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('button[data-lang]');
+    if (!b) return;
+    e.preventDefault(); e.stopPropagation();
+    setMode(b.getAttribute('data-lang')); b.blur();
+  });
+  bar.addEventListener('keydown', function (e) { e.stopPropagation(); });
+  var banner = document.querySelector('#demoBanner,[data-demo-banner]');
+  if (banner && banner.parentNode) banner.parentNode.insertBefore(bar, banner.nextSibling);
+  else document.body.insertBefore(bar, document.body.firstChild);
+
+  ['alert', 'confirm', 'prompt'].forEach(function (f) {
+    var orig = window[f];
+    if (typeof orig !== 'function') return;
+    window[f] = function (msg) {
+      var args = Array.prototype.slice.call(arguments);
+      if (args.length) args[0] = pick(msg);
+      return orig.apply(window, args);
+    };
+  });
+
+  var start = 'both';
+  try { start = localStorage.getItem(KEY) || 'both'; } catch (e) {}
+  var q = /[?&]lang=(zh|en|both)\b/.exec(location.search);
+  if (q) start = q[1];
+  obs = new MutationObserver(later);
+  setMode(start);
+})();
+</script>
