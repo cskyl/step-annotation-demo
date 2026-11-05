@@ -1,6 +1,8 @@
 # Step-authorship annotation interface demo
 
-A static site for trying two annotation pages in a browser. Every problem and dialogue here is made up; the site exists only to test the interface.
+A static site for trying two annotation pages in a browser. Every problem and dialogue in the demo pages is made up.
+
+`study/` holds the real annotation pages for invited annotators. Each page is encrypted (AES-256-GCM, key from PBKDF2-SHA256 of a passphrase, 600,000 iterations); the repository contains only ciphertext, and the page is decrypted in the browser after the passphrase is entered. Annotators get the passphrase separately.
 
 | Path | What it is |
 |---|---|
