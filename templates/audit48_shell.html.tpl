@@ -29,7 +29,7 @@ label{display:inline-flex;align-items:center;gap:6px;margin:4px 12px 4px 0}selec
 <h2>L2 — 正确最终答案的第一作者 / first author of the correct final</h2>
 <p><strong>流程 / Flow:</strong> 按消息顺序找完整正确最终答案 → 第一条完整包含正确答案的是 AI 就选 AI，是 Student 就选 Student；若没有任何消息完整说出它，选 Neither。多部分最终答案必须在同一条消息中包含全部部分；不同消息拼接不算。复制题目陈述不算答案。 / Find the first complete correct final answer in message order → choose AI or Student according to that message, or Neither if no message states it. A multi-part final must contain every part in one message; do not combine messages. A pasted problem statement is not an answer.</p>
 <h2>L3 — AI 是否先提出任意最终答案 / AI asserted any final first</h2>
-<p><strong>流程 / Flow:</strong> 找第一条声称最终答案的消息，不论对错 → AI 先说选 yes，否则选 no。Student 的试探性答案（例如 “x=4?”）也算 assertion。若 L2 = AI，则 L3 必须是 yes。 / Find the first message asserting any final answer, right or wrong → yes if it is AI, otherwise no. A Student tentative answer such as “x=4?” counts as an assertion. If L2 = AI, L3 must be yes.</p>
+<p><strong>流程 / Flow:</strong> 看 Student 第一次说出正确最终答案之前（试探性的 “是 3/28 吗？” 也算说出），有没有 AI 消息给出过任意最终答案，不论对错 → 有选 yes，没有选 no。Student 猜错的答案不算，不影响 L3。例：Student 先猜错，AI 后来给出正确答案 → L2 = AI，L3 = yes。若 L2 = AI，则 L3 必须是 yes。 / Before the Student first states the correct final answer (a tentative “is it 3/28?” counts), did any AI message assert a final answer, right or wrong? → yes if so, otherwise no. A Student’s wrong guess does not count. Example: the Student guesses wrong, then the AI gives the correct final → L2 = AI, L3 = yes. If L2 = AI, L3 must be yes.</p>
 </section>
 </div>
 <section><h2>七个自造例子 / Seven made-up worked examples</h2>
